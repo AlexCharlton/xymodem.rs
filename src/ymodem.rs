@@ -157,7 +157,7 @@ impl Ymodem {
                 (dev.write(&[NAK]))?;
                 self.errors += 1;
             } else {
-                // First packet received succesfully
+                // First packet received successfully
                 packet_num = packet_num.wrapping_add(1);
                 (dev.write(&[ACK]))?;
                 (dev.write(&[CRC]))?;
@@ -356,8 +356,9 @@ impl Ymodem {
         // We leave one 0 to indicate the name ends here
         curr_buff_idx += 1;
 
-        for byte in format!("{:x}", file_size_in_bytes).as_bytes() {
+        for byte in format!("{}", file_size_in_bytes).as_bytes() {
             buff[curr_buff_idx] = *byte;
+            curr_buff_idx += 1;
         }
 
         let crc = calc_crc(&buff[3..]);
