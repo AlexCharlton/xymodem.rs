@@ -489,17 +489,17 @@ impl Ymodem {
                     if c == NAK {
                         break;
                     } else {
-                        log::warn!("Expected ACK, got {}", c);
+                        log::warn!("Expected NAK, got {}", c);
                     }
                 }
-                None => warn!("Timeout waiting for ACK for EOT"),
+                None => warn!("Timeout waiting for NAK for EOT"),
             }
 
             self.errors += 1;
 
             if self.errors >= self.max_errors {
                 eprint!(
-                    "Exhausted max retries ({}) while waiting for ACK for EOT",
+                    "Exhausted max retries ({}) while waiting for NAK for EOT",
                     self.max_errors
                 );
                 return Err(Error::ExhaustedRetries);
@@ -538,6 +538,8 @@ impl Ymodem {
                     if c == CRC {
                         info!("YMODEM transmission successful");
                         break;
+                    } else if c == CAN {
+                        return Ok(()); // Receiver cancelled after we're done sending, so don't send the end frame and return gracefully
                     } else {
                         log::warn!("Expected ACK, got {}", c);
                     }
