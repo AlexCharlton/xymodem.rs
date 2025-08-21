@@ -77,7 +77,7 @@ impl Ymodem {
         let mut file_buf: Vec<u8> = Vec::new();
 
         self.errors = 0;
-        dbg!("Starting YMODEM receive");
+        debug!("Starting YMODEM receive");
         // Initialize transfer
         loop {
             (dev.write(&[CRC])?);
@@ -190,7 +190,6 @@ impl Ymodem {
         let mut received_first_eot = false;
 
         for range in 0..(num_of_packets + 3) {
-            dbg!(range);
             match get_byte_timeout(dev)? {
                 bt @ Some(SOH) | bt @ Some(STX) => {
                     // Handle next packet
@@ -283,13 +282,13 @@ impl Ymodem {
         let packets_to_send = f64::ceil(file_size_in_bytes as f64 / 1024.0) as u32;
         let last_packet_size = file_size_in_bytes % 1024;
 
-        dbg!("Starting YMODEM transfer");
+        debug!("Starting YMODEM transfer");
         (self.start_send(dev))?;
-        dbg!("First byte received. Sending start frame.");
+        debug!("First byte received. Sending start frame.");
         (self.send_start_frame(dev, file_name, file_size_in_bytes))?;
-        dbg!("Start frame acknowledged. Sending stream.");
+        debug!("Start frame acknowledged. Sending stream.");
         (self.send_stream(dev, stream, packets_to_send, last_packet_size))?;
-        dbg!("Sending EOT");
+        debug!("Sending EOT");
         (self.finish_send(dev))?;
 
         Ok(())
@@ -301,7 +300,7 @@ impl Ymodem {
             match (get_byte_timeout(dev))? {
                 Some(c) => match c {
                     CRC => {
-                        dbg!("16-bit CRC requested");
+                        debug!("16-bit CRC requested");
                         return Ok(());
                     }
                     CAN => {
@@ -371,7 +370,7 @@ impl Ymodem {
             match (get_byte_timeout(dev))? {
                 Some(c) => {
                     if c == ACK {
-                        dbg!("Received ACK for start frame");
+                        debug!("Received ACK for start frame");
                         break;
                     } else {
                         warn!("Expected ACK, got {}", c);
@@ -395,7 +394,7 @@ impl Ymodem {
             match (get_byte_timeout(dev))? {
                 Some(c) => {
                     if c == CRC {
-                        dbg!("Received C for start frame");
+                        debug!("Received C for start frame");
                         break;
                     } else {
                         warn!("Expected C, got {}", c);
@@ -435,7 +434,7 @@ impl Ymodem {
             let mut buff = vec![self.pad_byte; packet_size as usize + 3];
             let n = (stream.read(&mut buff[3..]))?;
             if n == 0 {
-                dbg!("Reached EOF");
+                debug!("Reached EOF");
                 return Ok(());
             }
 
@@ -458,7 +457,7 @@ impl Ymodem {
             match (get_byte_timeout(dev))? {
                 Some(c) => {
                     if c == ACK {
-                        dbg!("Received ACK for block {}", block_num);
+                        debug!("Received ACK for block {}", block_num);
                         continue;
                     } else {
                         warn!("Expected ACK, got {}", c);
@@ -579,7 +578,7 @@ impl Ymodem {
             match (get_byte_timeout(dev))? {
                 Some(c) => {
                     if c == ACK {
-                        dbg!("Received ACK for start frame");
+                        debug!("Received ACK for start frame");
                         break;
                     } else {
                         warn!("Expected ACK, got {}", c);
